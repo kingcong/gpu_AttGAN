@@ -52,7 +52,7 @@ CelebFaces Attributes Dataset (CelebA) 是一个大规模的人脸属性数据�
 
 # 环境要求
 
-- 硬件（/GPU）
+- 硬件（GPU）
     - 使用或GPU来搭建硬件环境。
 - 框架
     - [MindSpore](https://www.mindspore.cn/install/en)
@@ -63,38 +63,6 @@ CelebFaces Attributes Dataset (CelebA) 是一个大规模的人脸属性数据�
 # 快速入门
 
 通过官方网站安装MindSpore后，您可以按照如下步骤进行训练和评估：
-
-- 处理器环境运行
-
-  ```python
-  # 运行训练示例
-  export DEVICE_ID=0
-  export RANK_SIZE=1
-  python train.py --experiment_name 128_shortcut1_inject1_none --data_path /path/data/img_align_celeba --attr_path /path/data/list_attr_celeba.txt
-  OR
-  bash run_single_train.sh experiment_name /path/data/img_align_celeba /path/data/list_attr_celeba.txt
-
-  # 运行分布式训练示例
-  bash run_distribute_train.sh /path/hccl_config_file.json /path/data/img_align_celeba /path/data/list_attr_celeba.txt
-
-  # 运行评估示例
-  export DEVICE_ID=0
-  export RANK_SIZE=1
-  python eval.py --experiment_name 128_shortcut1_inject1_none --test_int 1.0 --custom_data /path/data/custom/ --custom_attr /path/data/list_attr_custom.txt --custom_img --gen_ckpt_name generator-119_84999.ckpt
-  OR
-  bash run_eval.sh experiment_name /path/data/custom/ /path/data/list_attr_custom.txt gen_ckpt_name
-  ```
-
-  对于分布式训练，需要提前创建JSON格式的hccl配置文件。该配置文件的绝对路径作为运行分布式脚本的第一个参数。
-
-  请遵循以下链接中的说明：
-
- <https://gitee.com/mindspore/models/tree/master/utils/hccl_tools.>
-
-  对于评估脚本，需要提前创建存放自定义图片(jpg)的目录以及属性编辑文件，关于属性编辑文件的说明见[脚本及样例代码](#脚本及样例代码)。目录以及属性编辑文件分别对应参数`custom_data`和`custom_attr`。checkpoint文件被训练脚本默认放置在
-  `/output/{experiment_name}/checkpoint`目录下，执行脚本时需要将检查点文件（Generator）的名称作为参数传入。
-
-  [注意] 以上路径均应设置为绝对路径
 
 - GPU处理器环境运行
 
@@ -152,15 +120,7 @@ CelebFaces Attributes Dataset (CelebA) 是一个大规模的人脸属性数据�
 
 ### 训练
 
-- 处理器环境运行
 
-  ```bash
-  export DEVICE_ID=0
-  export RANK_SIZE=1
-  python train.py --img_size 128 --experiment_name 128_shortcut1_inject1_none --data_path /path/data/img_align_celeba --attr_path /path/data/list_attr_celeba.txt
-  ```
-
-  训练结束后，当前目录下会生成output目录，在该目录下会根据你设置的experiment_name参数生成相应的子目录，训练时的参数保存在该子目录下的setting.txt文件中，checkpoint文件保存在`output/experiment_name/rank0`下。如果需要生成setting.txt文件，只需要执行一次train.py文件即可，此时脚本会根据设定的参数生成对应的setting.txt文件。该文件会被用于推理脚本。
 
 - GPU处理器环境运行
 
@@ -174,13 +134,6 @@ CelebFaces Attributes Dataset (CelebA) 是一个大规模的人脸属性数据�
 
 ### 分布式训练
 
-- 处理器环境运行
-
-  ```bash
-  bash run_distribute_train.sh /path/hccl_config_file.json /path/data/img_align_celeba /path/data/list_attr_celeba.txt
-  ```
-
-  上述shell脚本将在后台运行分布式训练。该脚本将在脚本目录下生成相应的LOG{RANK_ID}目录，每个进程的输出记录在相应LOG{RANK_ID}目录下的log.txt文件中。checkpoint文件保存在output/experiment_name/rank{RANK_ID}下。
 
 - GPU处理器环境运行
 
@@ -196,18 +149,7 @@ CelebFaces Attributes Dataset (CelebA) 是一个大规模的人脸属性数据�
 
 ### 评估
 
-- 在环境运行时评估自定义数据集
-  该网络可以用于修改面部属性，用户将希望修改的图片放在自定义的图片目录下，并根据自己期望修改的属性来修改属性编辑文件(文件的具体参数参照CelebA数据集及属性编辑文件)。完成后，需要将自定义图片目录和属性编辑文件作为参数传入测试脚本，分别对应custom_data以及custom_attr。
 
-  评估时选择已经生成好的检查点文件，作为参数传入测试脚本，对应参数为`gen_ckpt_name`(保存了编码器和解码器的参数)
-
-  ```bash
-  export DEVICE_ID=0
-  export RANK_SIZE=1
-  python eval.py --experiment_name 128_shortcut1_inject1_none --test_int 1.0 --custom_data /path/data/custom/ --custom_attr /path/data/list_attr_custom.txt --custom_img --gen_ckpt_name generator-119_84999.ckpt
-  ```
-
-  测试脚本执行完成后，用户进入当前目录下的`output/{experiment_name}/custom_img`下查看修改好的图片。
 
 - 在GPU环境运行时评估自定义数据集
   评估时选择已经生成好的检查点文件，作为参数传入测试脚本，对应参数为`GEN_CKPT_NAME`(保存了编码器和解码器的参数)
@@ -271,32 +213,32 @@ bash run_infer_310.sh [GEN_MINDIR_PATH] [ATTR_FILE_PATH] [DATA_PATH] [NEED_PREPR
 
 #### CelebA上的AttGAN
 
-| 参数                       |  910                                                  | GPU   |
-| -------------------------- | ----------------------------------------------------------- | ----- |
-| 模型版本                   | AttGAN                                                      | AttGAN |
-| 资源                       |                                                       | RTX-3090 |
-| 上传日期                   | 06/30/2021 (month/day/year)                                 | 11/23/2021 (month/day/year) |
-| MindSpore版本              | 1.2.0                                                       | 1.5.0rc1 |
-| 数据集                     | CelebA                                                      | CelebA |
-| 训练参数                   | batch_size=32, lr=0.0002                                    | batch_size=32, lr=0.0002 |
-| 优化器                     | Adam                                                        | Adam |
-| 生成器输出                 | image                                                       | image |
-| 速度                       | 5.56 step/s                                                 | 6.67 step/s |
-| 脚本                       | [AttGAN script](https://gitee.com/mindspore/models/tree/master/research/cv/AttGAN) | [AttGAN script](https://gitee.com/mindspore/models/tree/master/research/cv/AttGAN) |
+| 参数                       |   GPU   |
+| -------------------------- | ----- |
+| 模型版本                   |  AttGAN |
+| 资源                       |     RTX-3090 |
+| 上传日期                   |  11/23/2021 (month/day/year) |
+| MindSpore版本              |1.5.0rc1 |
+| 数据集                     | CelebA |
+| 训练参数                   |  batch_size=32, lr=0.0002 |
+| 优化器                     |  Adam |
+| 生成器输出                 |  image |
+| 速度                       |  6.67 step/s |
+| 脚本                       |  [AttGAN script](https://gitee.com/mindspore/models/tree/master/research/cv/AttGAN) |
 
 ### 推理性能
 
 #### CelebA上的AttGAN
 
-| 参数                       |  910                                                  | GPU   |
-| -------------------------- | ----------------------------------------------------------- | ----- |
-| 模型版本                   | AttGAN                                                      | AttGAN |
-| 资源                       |                                                       | RTX-3090 |
-| 上传日期                   | 06/30/2021 (month/day/year)                                 | 11/23/2021 (month/day/year) |
-| MindSpore版本              | 1.2.0                                                       | 1.5.0rc1 |
-| 数据集                     | CelebA                                                      | CelebA |
-| 推理参数                   | batch_size=1                                                | batch_size=1 |
-| 输出                       | image                                                       | image |
+| 参数                       |  GPU   |
+| -------------------------- | ----- |
+| 模型版本                   |  AttGAN |
+| 资源                       |  RTX-3090 |
+| 上传日期                   |  11/23/2021 (month/day/year) |
+| MindSpore版本              | 1.5.0rc1 |
+| 数据集                     |  CelebA |
+| 推理参数                   |  batch_size=1 |
+| 输出                       |  image |
 
 推理完成后可以获得对原图像进行属性编辑后的图片slide.
 
